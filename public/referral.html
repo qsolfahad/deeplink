@@ -163,14 +163,18 @@
         const script = document.createElement('script');
         script.src = src;
         script.onload = resolve;
-        script.onerror = reject;
+        script.onerror = (error) => {
+          console.error(`Error loading script from: ${src}`, error);
+          reject(error);
+        };
         document.head.appendChild(script);
       });
     }
 
     async function generateUUID() {
       try {
-        // ✅ Load working UUID library version (v8)
+        console.log("Loading UUID script...");
+        // Load the UUID library
         await loadScript("https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js");
 
         // Create a fingerprint string
@@ -192,16 +196,17 @@
           .map(b => b.toString(16).padStart(2, "0"))
           .join("");
 
-        // ✅ uuidv5 from global uuid object
+        // Generate UUID using uuid.v5
         const deviceUUID = uuid.v5(hex, uuid.v5.OID);
         document.getElementById("device-id").textContent = deviceUUID;
-        console.log("UUID:", deviceUUID);
+        console.log("Generated UUID:", deviceUUID);
       } catch (e) {
         console.error("Error generating UUID:", e);
-        document.getElementById("device-id").textContent = "Error generating ID";
+        document.getElementById("device-id").textContent = "Error generating ID. Please try again.";
       }
     }
 
+    // Run the UUID generation process
     generateUUID();
   </script>
 </body>
