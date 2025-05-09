@@ -200,8 +200,9 @@
 
         console.log("Hexadecimal String:", hex); // Log the hex string to check
 
-        // Now, generate the UUID using uuid.v5
-        const deviceUUID = uuid.v5(hex, uuid.v5.OID);
+        // Now, generate the UUID using uuid.v5 with a valid namespace
+        const namespace = uuid.v5.URL; // Use URL as a common valid namespace
+        const deviceUUID = uuid.v5(hex, namespace);
         document.getElementById("device-id").textContent = deviceUUID;
         console.log("Generated UUID:", deviceUUID);
       } catch (e) {
