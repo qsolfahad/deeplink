@@ -187,15 +187,19 @@
     async function generateUUID() {
       try {
         // Step 1: Generate the fingerprint
-        const fingerprint = createFingerprint();
+        // const fingerprint = createFingerprint();
 
-        // Step 2: Hash the fingerprint to get a hex string
-        const hexHash = await hashFingerprint(fingerprint);
-        console.log("Hexadecimal String:", hexHash); // Debugging log
+        // // Step 2: Hash the fingerprint to get a hex string
+        // const hexHash = await hashFingerprint(fingerprint);
+        // console.log("Hexadecimal String:", hexHash); // Debugging log
 
-        // Step 3: Generate UUID v5 with a namespace (e.g., URL)
-        const deviceUUID = uuid.v5(hexHash, uuid.v5.URL); // Use URL as a valid namespace
-        document.getElementById("device-id").textContent = deviceUUID;
+        // // Step 3: Generate UUID v5 with a namespace (e.g., URL)
+        // const deviceUUID = uuid.v5(hexHash, uuid.v5.URL); // Use URL as a valid namespace
+         const inputString = "ANDROID-13-ONEPLUS-NORD2-128GB"; // match exactly
+    const uuid = uuidv5(inputString, uuidv5.URL);
+    document.getElementById("device-id").innerText = uuid;
+    console.log("UUID:", uuid);
+        document.getElementById("device-id").textContent = uuid;
         console.log("Generated UUID:", deviceUUID);
       } catch (e) {
         console.error("Error generating UUID:", e);
