@@ -189,14 +189,18 @@
           new Date().getTimezoneOffset()
         ].join('-');
 
-        // SHA-1 hash
+        // Ensure the fingerprint is a valid string for hashing
         const hashBuffer = new TextEncoder().encode(fingerprint);
+
+        // Hash the fingerprint using SHA-1
         const digest = await crypto.subtle.digest("SHA-1", hashBuffer);
         const hex = Array.from(new Uint8Array(digest))
           .map(b => b.toString(16).padStart(2, "0"))
           .join("");
 
-        // Generate UUID using uuid.v5
+        console.log("Hexadecimal String:", hex); // Log the hex string to check
+
+        // Now, generate the UUID using uuid.v5
         const deviceUUID = uuid.v5(hex, uuid.v5.OID);
         document.getElementById("device-id").textContent = deviceUUID;
         console.log("Generated UUID:", deviceUUID);
