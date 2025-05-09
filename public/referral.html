@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -63,6 +63,86 @@
     }
 
     
+  </script>
+
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Referral Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f7f7f7;
+    }
+    .container {
+      text-align: center;
+    }
+    h1 {
+      font-size: 2em;
+      color: #333;
+    }
+    p {
+      font-size: 1.2em;
+      color: #666;
+    }
+    .referral-code {
+      font-weight: bold;
+      color: #4CAF50;
+      font-size: 1.5em;
+    }
+    .cta {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 1.2em;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Welcome to Our Referral Program</h1>
+    <p>Thank you for visiting via a referral link!</p>
+    <p>Your referral code is: <span class="referral-code" id="referral-code">Loading...</span></p>
+    <p>Redirecting to the app...</p>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get('code');
+    const referralDisplay = document.getElementById('referral-code');
+
+    if (referralCode) {
+      referralDisplay.innerText = referralCode;
+    } else {
+      referralDisplay.innerText = 'No code found';
+    }
+
+    // Replace these with your actual values
+    const iOSAppStoreURL = 'https://apps.apple.com/app/idYOUR_APP_ID?referral=' + referralCode; // Your App Store or TestFlight link
+    const appSchemeURL = `yourapp://referral?code=${referralCode}`; // Your app scheme
+
+    // Try to open the app via scheme
+    setTimeout(() => {
+      window.location.href = appSchemeURL;
+    }, 500);
+
+    // If app not installed, go to App Store after 2 seconds
+    setTimeout(() => {
+      window.location.href = iOSAppStoreURL;
+    }, 2000);
   </script>
 
 </body>
