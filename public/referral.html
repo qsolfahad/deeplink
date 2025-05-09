@@ -152,66 +152,57 @@
 <head>
   <meta charset="UTF-8" />
   <title>Referral Redirect</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
 </head>
 <body>
   <h1>Your Device ID:</h1>
   <p id="device-id">Loading...</p>
 
   <script>
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = resolve;
-        script.onerror = (error) => {
-          console.error(`Error loading script from: ${src}`, error);
-          reject(error);
-        };
-        document.head.appendChild(script);
-      });
+    // Generate a consistent fingerprint
+    function createFingerprint() {
+      return [
+        navigator.userAgent,         // Browser user agent
+        navigator.language,          // Language
+        screen.width,                // Screen width
+        screen.height,               // Screen height
+        screen.colorDepth,           // Screen color depth
+        navigator.platform,          // Platform (e.g., Windows, Mac)
+        navigator.hardwareConcurrency, // Number of CPU cores
+        new Date().getTimezoneOffset() // Timezone offset
+      ].join('-'); // Join data to create a fingerprint string
     }
 
+    // Hash the fingerprint to SHA-1
+    async function hashFingerprint(fingerprint) {
+      const hashBuffer = new TextEncoder().encode(fingerprint);
+      const digest = await crypto.subtle.digest("SHA-1", hashBuffer);
+      const hex = Array.from(new Uint8Array(digest))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+      return hex;
+    }
+
+    // Generate the UUID v5
     async function generateUUID() {
       try {
-        console.log("Loading UUID script...");
-        // Load the UUID library
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js");
+        // Step 1: Generate the fingerprint
+        const fingerprint = createFingerprint();
 
-        // Create a fingerprint string
-        const fingerprint = [
-          navigator.userAgent,
-          navigator.language,
-          screen.width,
-          screen.height,
-          screen.colorDepth,
-          navigator.platform,
-          navigator.hardwareConcurrency,
-          new Date().getTimezoneOffset()
-        ].join('-');
+        // Step 2: Hash the fingerprint to get a hex string
+        const hexHash = await hashFingerprint(fingerprint);
+        console.log("Hexadecimal String:", hexHash); // Debugging log
 
-        // Ensure the fingerprint is a valid string for hashing
-        const hashBuffer = new TextEncoder().encode(fingerprint);
-
-        // Hash the fingerprint using SHA-1
-        const digest = await crypto.subtle.digest("SHA-1", hashBuffer);
-        const hex = Array.from(new Uint8Array(digest))
-          .map(b => b.toString(16).padStart(2, "0"))
-          .join("");
-
-        console.log("Hexadecimal String:", hex); // Log the hex string to check
-
-        // Now, generate the UUID using uuid.v5 with a valid namespace
-        const namespace = uuid.v5.URL; // Use URL as a common valid namespace
-        const deviceUUID = uuid.v5(hex, namespace);
+        // Step 3: Generate UUID v5 with a namespace (e.g., URL)
+        const deviceUUID = uuid.v5(hexHash, uuid.v5.URL); // Use URL as a valid namespace
         document.getElementById("device-id").textContent = deviceUUID;
         console.log("Generated UUID:", deviceUUID);
       } catch (e) {
         console.error("Error generating UUID:", e);
-        document.getElementById("device-id").textContent = "Error generating ID. Please try again.";
       }
     }
 
-    // Run the UUID generation process
+    // Run the UUID generation
     generateUUID();
   </script>
 </body>
