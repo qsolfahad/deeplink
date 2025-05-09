@@ -157,7 +157,6 @@
   <h1>Your Device ID:</h1>
   <p id="device-id">Loading...</p>
 
-  <!-- uuid script is loaded manually -->
   <script>
     function loadScript(src) {
       return new Promise((resolve, reject) => {
@@ -171,8 +170,10 @@
 
     async function generateUUID() {
       try {
-        await loadScript("https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuid.min.js");
+        // ✅ Load working UUID library version (v8)
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js");
 
+        // Create a fingerprint string
         const fingerprint = [
           navigator.userAgent,
           navigator.language,
@@ -184,12 +185,14 @@
           new Date().getTimezoneOffset()
         ].join('-');
 
+        // SHA-1 hash
         const hashBuffer = new TextEncoder().encode(fingerprint);
         const digest = await crypto.subtle.digest("SHA-1", hashBuffer);
         const hex = Array.from(new Uint8Array(digest))
           .map(b => b.toString(16).padStart(2, "0"))
           .join("");
 
+        // ✅ uuidv5 from global uuid object
         const deviceUUID = uuid.v5(hex, uuid.v5.OID);
         document.getElementById("device-id").textContent = deviceUUID;
         console.log("UUID:", deviceUUID);
