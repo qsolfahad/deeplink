@@ -67,7 +67,7 @@
 
 </body>
 </html> -->
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -146,4 +146,27 @@
   </script>
 
 </body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Referral Redirect</title>
+    <script src="https://cdn.jsdelivr.net/gh/biggora/device-uuid/lib/device-uuid.min.js"></script>
+</head>
+
+<body>
+    <h1>Your Device ID:</h1>
+    <p id="device-id">Loading...</p>
+
+    <script>
+        window.onload = function () {
+            var uuid = new DeviceUUID().get();
+            document.getElementById("device-id").textContent = uuid;
+            console.log(uuid);
+        };
+    </script>
+</body>
+
 </html>
