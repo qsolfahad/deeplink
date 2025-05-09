@@ -163,7 +163,7 @@
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
       try {
-        // Create a simple browser fingerprint string
+        // Create a browser fingerprint string
         const fingerprint = [
           navigator.userAgent,
           navigator.language,
@@ -181,9 +181,11 @@
           .map(b => b.toString(16).padStart(2, "0"))
           .join("");
 
-        const uuid = uuidv5(hex, uuidv5.OID);
-        document.getElementById("device-id").textContent = uuid;
-        console.log("Standard UUID:", uuid);
+        // ✅ Correct usage of the UMD global
+        const deviceUUID = uuid.v5(hex, uuid.v5.OID);
+
+        document.getElementById("device-id").textContent = deviceUUID;
+        console.log("Standard UUID:", deviceUUID);
       } catch (error) {
         console.error("Error generating UUID:", error);
         document.getElementById("device-id").textContent = "Error generating ID";
