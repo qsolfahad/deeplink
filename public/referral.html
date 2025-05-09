@@ -151,31 +151,45 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Referral Redirect</title>
-    <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/device-uuid@1.0.3/lib/device-uuid.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Referral Redirect</title>
+  <!-- Load uuidv5 first -->
+  <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv5.min.js"></script>
+  <!-- Load DeviceUUID properly -->
+  <script src="https://cdn.jsdelivr.net/npm/device-uuid@1.0.3/lib/device-uuid.min.js"></script>
 </head>
 
 <body>
-    <h1>Your Device ID:</h1>
-    <p id="device-id">Loading...</p>
+  <h1>Your Device ID:</h1>
+  <p id="device-id">Loading...</p>
 
-    <script>
-        window.onload = async function () {
-            const rawId = new DeviceUUID().get();
+  <!-- Run script AFTER libraries are loaded -->
+  <script>
+    // Make sure script runs after DOM and libraries are loaded
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        if (typeof DeviceUUID === 'undefined') {
+          console.error("DeviceUUID is not loaded");
+          document.getElementById("device-id").textContent = "DeviceUUID failed to load";
+          return;
+        }
 
-            const hashBuffer = new TextEncoder().encode(rawId);
-            const digest = await crypto.subtle.digest("SHA-1", hashBuffer);
-            const hex = Array.from(new Uint8Array(digest))
-                .map(b => b.toString(16).padStart(2, "0"))
-                .join("");
+        const rawId = new DeviceUUID().get();
+        const hashBuffer = new TextEncoder().encode(rawId);
+        const digest = await crypto.subtle.digest("SHA-1", hashBuffer);
+        const hex = Array.from(new Uint8Array(digest))
+          .map(b => b.toString(16).padStart(2, "0"))
+          .join("");
 
-            const uuid = uuidv5(hex, uuidv5.OID);
-            console.log("Standard UUID:", uuid);
-            document.getElementById("device-id").textContent = uuid;
-        };
-    </script>
+        const uuid = uuidv5(hex, uuidv5.OID);
+        document.getElementById("device-id").textContent = uuid;
+        console.log("Standard UUID:", uuid);
+      } catch (error) {
+        console.error("Error generating UUID:", error);
+        document.getElementById("device-id").textContent = "Error generating ID";
+      }
+    });
+  </script>
 </body>
 
 </html>
