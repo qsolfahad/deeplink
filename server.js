@@ -14,7 +14,9 @@ app.post('/create-session', async (req, res) => {
 
     const response = await axios.post(
       'https://test-bankalfalah.gateway.mastercard.com/api/rest/version/100/merchant/TESTATMOSPHERGYM/session',
-    
+      {
+     
+      },// Empty body for session creation
       {
         headers: {
           'Content-Type': 'application/json',
