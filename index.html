@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      src="https://test-bankalfalah.gateway.mastercard.com/static/checkout/checkout.min.js"
+      data-error="errorCallback"
+      data-cancel="cancelCallback"
+    ></script>
+
+    <script type="text/javascript">
+      let checkoutConfigured = false;
+
+      async function initializeCheckout() {
+        try {
+          const response = await fetch("http://localhost:3000/create-session", {
+            method: "POST",
+          });
+          const data = await response.json();
+
+          console.log("Session Data:", data);
+
+          Checkout.configure({
+            session: {
+              id: data.session.id,
+            },
+          });
+
+          checkoutConfigured = true;
+          document.getElementById("embeddedBtn").disabled = false;
+          document.getElementById("paymentPageBtn").disabled = false;
+        } catch (error) {
+          console.error("Error initializing checkout:", error);
+        }
+      }
+
+      function errorCallback(error) {
+        console.log("Checkout Error:", JSON.stringify(error));
+      }
+
+      function cancelCallback() {
+        console.log("Payment cancelled");
+      }
+
+      function showEmbeddedPage() {
+        if (!checkoutConfigured) {
+          console.error("Checkout not configured yet!");
+          return;
+        }
+        Checkout.showEmbeddedPage("#embed-target");
+      }
+
+      function showPaymentPage() {
+        if (!checkoutConfigured) {
+          console.error("Checkout not configured yet!");
+          return;
+        }
+        Checkout.showPaymentPage();
+      }
+
+      window.onload = initializeCheckout;
+    </script>
+  </head>
+
+  <body>
+    <div id="embed-target"></div>
+    <input
+      id="embeddedBtn"
+      type="button"
+      value="Pay with Embedded Page"
+      onclick="showEmbeddedPage()"
+      disabled
+    />
+    <input
+      id="paymentPageBtn"
+      type="button"
+      value="Pay with Payment Page"
+      onclick="showPaymentPage()"
+      disabled
+    />
+  </body>
+</html>
