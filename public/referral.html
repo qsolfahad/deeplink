@@ -1,211 +1,64 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Referral Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f7f7f7;
-    }
-    .container {
-      text-align: center;
-    }
-    h1 {
-      font-size: 2em;
-      color: #333;
-    }
-    p {
-      font-size: 1.2em;
-      color: #666;
-    }
-    .referral-code {
-      font-weight: bold;
-      color: #4CAF50;
-      font-size: 1.5em;
-    }
-    .cta {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 1.2em;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <h1>Welcome to Our Referral Program</h1>
-    <p>Thank you for visiting via a referral link!</p>
-    <p>Your referral code is: <span class="referral-code" id="referral-code">Loading...</span></p>
-    
-  </div>
-
-  <script>
-    // Get the referral code from the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const referralCode = urlParams.get('code');
-
-    // Display the referral code on the page
-    if (referralCode) {
-      document.getElementById('referral-code').innerText = referralCode;
-    } else {
-      document.getElementById('referral-code').innerText = 'No code found';
-    }
-
-    
-  </script>
-
-</body>
-</html> -->
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Referral Page</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f7f7f7;
-    }
-    .container {
-      text-align: center;
-    }
-    h1 {
-      font-size: 2em;
-      color: #333;
-    }
-    p {
-      font-size: 1.2em;
-      color: #666;
-    }
-    .referral-code {
-      font-weight: bold;
-      color: #4CAF50;
-      font-size: 1.5em;
-    }
-    .cta {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 1.2em;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <h1>Welcome to Our Referral Program</h1>
-    <p>Thank you for visiting via a referral link!</p>
-    <p>Your referral code is: <span class="referral-code" id="referral-code">Loading...</span></p>
-    <p>Redirecting to the app...</p>
-  </div>
-
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const referralCode = urlParams.get('code');
-    const referralDisplay = document.getElementById('referral-code');
-
-    if (referralCode) {
-      referralDisplay.innerText = referralCode;
-    } else {
-      referralDisplay.innerText = 'No code found';
-    }
-
-    // Replace these with your actual values
-    const iOSAppStoreURL = 'https://testflight.apple.com/join/5e139bG9?referral=${referralCode}'; // Your App Store or TestFlight link
-    const appSchemeURL = `fitnfi://referral?code=${referralCode}`; // Your app scheme
-
-    // Try to open the app via scheme
-    setTimeout(() => {
-      window.location.href = appSchemeURL;
-    }, 500);
-
-    // If app not installed, go to App Store after 2 seconds
-    setTimeout(() => {
-      window.location.href = iOSAppStoreURL;
-    }, 2000);
-  </script>
-
-</body>
-</html> -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Referral Redirect</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
-</head>
-<body>
-  <h1>Your Device ID:</h1>
-  <p id="device-id">Loading...</p>
+  <title>Bank Alfalah Hosted Checkout</title>
+  <script src="https://test-bankalfalah.gateway.mastercard.com/static/checkout/checkout.min.js"
+          data-error="errorCallback"
+          data-cancel="cancelCallback"
+          data-complete="completeCallback">
+  </script>
 
-  <script>
-    // Generate a consistent fingerprint
-    function createFingerprint() {
-      return 'hello';
-      // return [
-      //   navigator.userAgent,         // Browser user agent
-      //   navigator.language,          // Language
-      //   screen.width,                // Screen width
-      //   screen.height,               // Screen height
-      //   screen.colorDepth,           // Screen color depth
-      //   navigator.platform,          // Platform (e.g., Windows, Mac)
-      //   navigator.hardwareConcurrency, // Number of CPU cores
-      //   new Date().getTimezoneOffset() // Timezone offset
-      // ].join('-'); // Join data to create a fingerprint string
-    }
+  <script type="text/javascript">
+    // Use local variables instead of sessionStorage
+    let paymentData = {};
 
-    // Hash the fingerprint to SHA-1
-    async function hashFingerprint(fingerprint) {
-      const hashBuffer = new TextEncoder().encode(fingerprint);
-      const digest = await crypto.subtle.digest("SHA-1", hashBuffer);
-      const hex = Array.from(new Uint8Array(digest))
-        .map(b => b.toString(16).padStart(2, "0"))
-        .join("");
-      return hex;
-    }
-
-    // Generate the UUID v5
-    async function generateUUID() {
-      try {
-        // Step 1: Generate the fingerprint
-        const fingerprint = createFingerprint();
-
-        // Step 2: Hash the fingerprint to get a hex string
-        const hexHash = await hashFingerprint(fingerprint);
-        console.log("Hexadecimal String:", hexHash); // Debugging log
-
-        // Step 3: Generate UUID v5 with a namespace (e.g., URL)
-        const deviceUUID = uuid.v5(hexHash, uuid.v5.URL); // Use URL as a valid namespace
-      
-        document.getElementById("device-id").textContent = deviceUUID;
-        console.log("Generated UUID:", deviceUUID);
-      } catch (e) {
-        console.error("Error generating UUID:", e);
+    function errorCallback(error) {
+      console.log("Error:", JSON.stringify(error));
+      if (window.flutter_inappwebview) {
+        window.flutter_inappwebview.callHandler('paymentEvent', 'error', error);
       }
     }
 
-    // Run the UUID generation
-    generateUUID();
+    function cancelCallback() {
+      console.log("Payment cancelled");
+      if (window.flutter_inappwebview) {
+        window.flutter_inappwebview.callHandler('paymentEvent', 'cancel');
+      }
+    }
+
+    function completeCallback(result) {
+      console.log("Payment complete", result);
+      if (window.flutter_inappwebview) {
+        window.flutter_inappwebview.callHandler('paymentEvent', 'complete', result);
+      }
+    }
+
+    function configureCheckout(sessionId) {
+      Checkout.configure({
+        session: {
+          id: sessionId
+        }
+      });
+    }
+
+    function startEmbedded() {
+      Checkout.showEmbeddedPage('#embed-target');
+    }
+
+    function startHostedPage() {
+      Checkout.showPaymentPage();
+    }
+
+    window.onload = function() {
+      configureCheckout("$sessionId");
+    };
   </script>
+</head>
+<body>
+  <h2>Pay Now</h2>
+  <div id="embed-target" style="min-height: 600px;"></div>
+
+  <input type="button" value="Pay with Embedded Page" onclick="startEmbedded();" />
+  <input type="button" value="Pay with Hosted Page" onclick="startHostedPage();" />
 </body>
 </html>
