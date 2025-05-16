@@ -23,7 +23,7 @@ app.get('/create-session', async (req, res) => {
           Authorization:
             'Basic ' +
             Buffer.from(
-              'TESTATMOSPHERGYM:607b0aa9d9f0e558118b9a98274bc47s'
+              'TESTATMOSPHERGYM:607b0aa9d9f0e558118b9a9827bbc47e'
             ).toString('base64')
         }
       }
