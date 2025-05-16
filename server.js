@@ -16,11 +16,11 @@ app.post('/create-session', async (req, res) => {
       checkoutMode: "WEBSITE",
       interaction: {
         operation: "PURCHASE",
-        merchant: {
-          name: "TESTATMOSPHERGYM",
-          url: "https://www.your.site.url.com"
-        },
-        returnUrl: "https://www.your.site.url.com" // must be a real URL
+        // merchant: {
+        //   name: "TESTATMOSPHERGYM",
+        //   url: "https://www.your.site.url.com"
+        // },
+        // returnUrl: "https://www.your.site.url.com" // must be a real URL
       },
       order: {
         currency: "PKR",
