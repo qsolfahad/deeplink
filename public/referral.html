@@ -1,64 +1,36 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>Bank Alfalah Hosted Checkout</title>
-  <script src="https://test-bankalfalah.gateway.mastercard.com/static/checkout/checkout.min.js"
-          data-error="errorCallback"
-          data-cancel="cancelCallback"
-          data-complete="completeCallback">
-  </script>
+    <script src="https://test-bankalfalah.gateway.mastercard.com/static/checkout/checkout.min.js"
+        data-error="errorCallback" data-cancel="cancelCallback">
+        </script>
 
-  <script type="text/javascript">
-    // Use local variables instead of sessionStorage
-    let paymentData = {};
-
-    function errorCallback(error) {
-      console.log("Error:", JSON.stringify(error));
-      if (window.flutter_inappwebview) {
-        window.flutter_inappwebview.callHandler('paymentEvent', 'error', error);
-      }
-    }
-
-    function cancelCallback() {
-      console.log("Payment cancelled");
-      if (window.flutter_inappwebview) {
-        window.flutter_inappwebview.callHandler('paymentEvent', 'cancel');
-      }
-    }
-
-    function completeCallback(result) {
-      console.log("Payment complete", result);
-      if (window.flutter_inappwebview) {
-        window.flutter_inappwebview.callHandler('paymentEvent', 'complete', result);
-      }
-    }
-
-    function configureCheckout(sessionId) {
-      Checkout.configure({
-        session: {
-          id: 'SESSION0002547995787M2934171G86'
+    <script type="text/javascript">
+        function errorCallback(error) {
+            console.log(JSON.stringify(error));
         }
-      });
-    }
+        function cancelCallback() {
+            console.log('Payment cancelled');
+        }
 
-    function startEmbedded() {
-      Checkout.showEmbeddedPage('#embed-target');
-    }
+        Checkout.configure({
+            session: {
+                id: '$sessionId'
+            }
+        });
 
-    function startHostedPage() {
-      Checkout.showPaymentPage();
-    }
-
-    window.onload = function() {
-      configureCheckout("$sessionId");
-    };
-  </script>
+    </script>
 </head>
-<body>
-  <h2>Pay Now</h2>
-  <div id="embed-target" style="min-height: 600px;"></div>
 
-  <input type="button" value="Pay with Embedded Page" onclick="startEmbedded();" />
-  <input type="button" value="Pay with Hosted Page" onclick="startHostedPage();" />
+<body>
+    ...
+
+    <div id="embed-target"> </div>
+    <input type="button" value="Pay with Embedded Page" onclick="Checkout.showEmbeddedPage('#embed-target');" />
+    <input type="button" value="Pay with Payment Page" onclick="Checkout.showPaymentPage();" />
+
+    ...
 </body>
+
 </html>
