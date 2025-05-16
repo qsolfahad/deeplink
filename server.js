@@ -17,7 +17,7 @@ app.post('/create-session', async (req, res) => {
       interaction: {
         operation: "PURCHASE",
         merchant: {
-          name: "JK Enterprises LLC",
+          name: "TESTATMOSPHERGYM",
           url: "https://www.your.site.url.com"
         },
         returnUrl: "https://www.your.site.url.com" // must be a real URL
