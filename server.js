@@ -24,7 +24,7 @@ app.post('/create-session', async (req, res) => {
       },
       order: {
         currency: "PKR",
-        amount: "250.00",
+        amount: "1000.00",
         id: "ORDER-" + Math.floor(Math.random() * 100000), // generate unique ID
         description: "Goods and Services"
       }
