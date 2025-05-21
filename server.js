@@ -18,9 +18,10 @@ app.post('/create-session', async (req, res) => {
         operation: "PURCHASE",
         merchant: {
           name: "TESTATMOSPHERGYM",
-          url: "https://www.your.site.url.com"
+          // url: "https://www.your.site.url.com"
+          url: "http://localhost:3000/success" // for testing purposes
         },
-        returnUrl: "https://www.your.site.url.com" // must be a real URL
+        returnUrl: "http://localhost:3000/success" // must be a real URL
       },
       order: {
         currency: "PKR",
@@ -49,6 +50,11 @@ app.post('/create-session', async (req, res) => {
   }
 });
 
+app.get('/success', (req, res) => {
+  // Handle success response from the payment gateway
+  console.log('Payment successful:', req.query);
+  res.send('Payment was successful!');
+});
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');
