@@ -29,7 +29,7 @@ app.post('/create-session', async (req, res) => {
         description: "Goods and Services"
       }
     };
-    console.log('Payload:', payload);
+    console.log('Payload:', payload); 
     const response = await axios.post(
       'https://test-bankalfalah.gateway.mastercard.com/api/rest/version/100/merchant/TESTATMOSPHERGYM/session',
       payload,
