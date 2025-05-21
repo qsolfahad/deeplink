@@ -4,15 +4,16 @@
   <head>
     <script
       src="https://test-bankalfalah.gateway.mastercard.com/static/checkout/checkout.min.js"
-   
+      
     ></script>
 
     <script type="text/javascript">
       let checkoutConfigured = false;
-
+        
       async function initializeCheckout() {
         try {
           const response = await fetch("https://deeplink-drab.vercel.app/create-session", {
+          // const response = await fetch("http://localhost:3000/create-session", {
             method: "POST",
           });
           const data = await response.json();
