@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -10,10 +9,27 @@
     <script type="text/javascript">
       let checkoutConfigured = false;
 
+      // Helper to get query param
+      function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+      }
+
       async function initializeCheckout() {
         try {
-          const response = await fetch("https://deeplink-drab.vercel.app/create-session", {
+          const token = getQueryParam("token");
+          if (!token) {
+            alert("Missing token in URL");
+            return;
+          }
+          console.log("Token:", token);
+          // const response = await fetch("https://deeplink-drab.vercel.app/create-session", {
+          const response = await fetch("http://localhost:3000/create-session", {
             method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ token })
           });
           const data = await response.json();
 

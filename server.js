@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const jwt = require('jsonwebtoken'); // Add this line
 const app = express();
 
 app.use(cors()); // Allow all origins — for dev only
@@ -9,6 +10,27 @@ app.use(express.json());
 
 app.post('/create-session', async (req, res) => {
   try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: 'Missing token' });
+    }
+
+    // Use the same secret as used to sign the JWT
+    const JWT_SECRET = 'a-string-secret-at-least-256-bits-long'; // <-- set this to your actual secret
+    let decoded;
+    try {
+      console.log('Verifying token:', token);
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      console.error('JWT verification failed:', err.message);
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const amount = decoded.amount;
+    if (!amount) {
+      return res.status(400).json({ error: 'Amount missing in token' });
+    }
+
     const credentials = 'TESTATMOSPHERGYM:607b0aa9d9f0e558118b9a9827bbc47e';
     const authHeader = 'Basic ' + Buffer.from(credentials).toString('base64');
     const payload = {
@@ -18,15 +40,14 @@ app.post('/create-session', async (req, res) => {
         operation: "PURCHASE",
         merchant: {
           name: "TESTATMOSPHERGYM",
-          // url: "https://www.your.site.url.com"
-          url: "http://localhost:3000/success" // for testing purposes
+          url: "http://localhost:3000/success"
         },
-        returnUrl: "http://localhost:3000/success" // must be a real URL
+        returnUrl: "http://localhost:3000/success"
       },
       order: {
         currency: "PKR",
-        amount: "1000.00",
-        id: "ORDER-" + Math.floor(Math.random() * 100000), // generate unique ID
+        amount: amount.toFixed(2), // Use amount from token
+        id: "ORDER-" + Math.floor(Math.random() * 100000),
         description: "Goods and Services"
       }
     };
@@ -37,7 +58,6 @@ app.post('/create-session', async (req, res) => {
       {
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': authHeader,
           Authorization: `Basic bWVyY2hhbnQuVEVTVEFUTU9TUEhFUkdZTTo2MDdiMGFhOWQ5ZjBlNTU4MTE4YjlhOTgyN2JiYzQ3ZQ==`,
         },
       }
