@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -12,8 +11,8 @@
         
       async function initializeCheckout() {
         try {
-          const response = await fetch("https://deeplink-drab.vercel.app/create-session", {
-          // const response = await fetch("http://localhost:3000/create-session", {
+          // const response = await fetch("https://deeplink-drab.vercel.app/create-session", {
+          const response = await fetch("http://localhost:3000/create-session", {
             method: "POST",
           });
           const data = await response.json();
@@ -30,6 +29,7 @@
           checkoutConfigured = true;
           document.getElementById("embeddedBtn").disabled = false;
           document.getElementById("paymentPageBtn").disabled = false;
+          document.getElementById("refundBtn").disabled = false;
         } catch (error) {
           console.error("Error initializing checkout:", error);
         }
@@ -59,6 +59,33 @@
         Checkout.showPaymentPage();
       }
 
+      function showRefund() {
+        const refundForm = document.getElementById('refundForm');
+        refundForm.style.display = 'block';
+      }
+
+      async function submitRefund(event) {
+        event.preventDefault();
+        const orderId = document.getElementById('orderId').value;
+        // const transactionId = document.getElementById('transactionId').value;
+        const amount = document.getElementById('amount').value;
+
+        try {
+          const response = await fetch("http://localhost:3000/refund", {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId, amount })
+          });
+          const data = await response.json();
+          alert(data.message || 'Refund request processed');
+        } catch (error) {
+          console.error("Error processing refund:", error);
+          alert('Error processing refund');
+        }
+      }
+
       window.onload = initializeCheckout;
     </script>
   </head>
@@ -79,5 +106,29 @@
       onclick="showPaymentPage()"
       disabled
     />
+    <input
+      id="refundBtn"
+      type="button"
+      value="Refund Transaction"
+      onclick="showRefund()"
+      disabled
+    />
+    <div id="refundForm" style="display: none;">
+      <form onsubmit="submitRefund(event)">
+        <div>
+          <label for="orderId">Order ID:</label>
+          <input type="text" id="orderId" required />
+        </div>
+        <!-- <div>
+          <label for="transactionId">Transaction ID:</label>
+          <input type="text" id="transactionId" required />
+        </div> -->
+        <div>
+          <label for="amount">Amount:</label>
+          <input type="number" id="amount" required />
+        </div>
+        <button type="submit">Process Refund</button>
+      </form>
+    </div>
   </body>
 </html>
