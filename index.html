@@ -3,12 +3,9 @@
   <head>
     <script
       src="https://test-bankalfalah.gateway.mastercard.com/static/checkout/checkout.min.js"
-   
     ></script>
 
     <script type="text/javascript">
-      let checkoutConfigured = false;
-
       // Helper to get query param
       function getQueryParam(name) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -39,12 +36,10 @@
             session: {
               id: data.session.id,
             },
-          
           });
 
-          checkoutConfigured = true;
-          document.getElementById("embeddedBtn").disabled = false;
-          document.getElementById("paymentPageBtn").disabled = false;
+          // Automatically redirect to payment page
+          Checkout.showPaymentPage();
         } catch (error) {
           console.error("Error initializing checkout:", error);
         }
@@ -58,12 +53,17 @@
         console.log("Payment cancelled");
       }
 
-      function showEmbeddedPage() {
-        if (!checkoutConfigured) {
-          console.error("Checkout not configured yet!");
-          return;
-        }
-        Checkout.showEmbeddedPage("#embed-target");
+      window.onload = initializeCheckout;
+    </script>
+  </head>
+
+  <body>
+    <div id="loader" style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+      <span>Loading, please wait...</span>
+    </div>
+    <!-- No buttons or embed target -->
+  </body>
+</html>
       }
 
       function showPaymentPage() {
