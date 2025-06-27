@@ -78,8 +78,8 @@ app.post('/create-session', async (req, res) => {
           url: "https://deeplink-drab.vercel.app"
           // url: "http://localhost:3000/success" // for testing purposes
         },
-        returnUrl: `https://deeplink-drab.vercel.app/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
-        // returnUrl: `http://localhost:3000/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
+        // returnUrl: `https://deeplink-drab.vercel.app/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
+        returnUrl: `http://localhost:3000/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
       },
       order: {
         currency: "PKR",
@@ -268,27 +268,8 @@ app.get('/success', async (req, res) => {
       amount: result.amount
     };
 
-    // Prevent duplicate: check if transaction already exists
-    let alreadyExists = false;
-    try {
-      const checkRes = await axios.get(
-        `http://127.0.0.1:8000/payment_method/bank/transaction_exists?transaction_id=${pythonApiPayload.transaction_id}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${auth_token}`
-          }
-        }
-      );
-      alreadyExists = checkRes.data && checkRes.data.exists;
-    } catch (checkErr) {
-      // If check fails, assume not exists and proceed
-      alreadyExists = false;
-    }
-
-    if (!alreadyExists) {
-      await post_bank_data(pythonApiPayload, auth_token);
-    }
+    post_data = await post_bank_data(pythonApiPayload, auth_token);
+    console.log('Post data result:', post_data);
 
     // Show success message as styled HTML
     res.send(`
