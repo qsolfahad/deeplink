@@ -77,8 +77,6 @@ app.post('/create-session', async (req, res) => {
           name: "TESTATMOSPHERGYM",
           url: "https://deeplink-drab.vercel.app"
           // url: "http://localhost:3000/success" // for testing purposes
-          url: "https://deeplink-drab.vercel.app"
-          // url: "http://localhost:3000/success" // for testing purposes
         },
         returnUrl: `https://deeplink-drab.vercel.app/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
         // returnUrl: `http://localhost:3000/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
