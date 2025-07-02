@@ -8,15 +8,18 @@ app.use(cors());
 
 app.use(express.json());
 
-async function get_bank_credentials(auth_token) {
+async function get_bank_credentials(org_id, auth_token) {
 
   try {
-    data = await axios.get(
-      'http://127.0.0.1:8000/payment_method/bank_account/details',
+    const data = await axios.get(
+      'http://192.168.11.23:8890/payment_method/bank/details',
       {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth_token}`
+        },
+        params: {
+          org_id: org_id
         }
       }
     );
@@ -26,9 +29,13 @@ async function get_bank_credentials(auth_token) {
       success: true,
       message: 'Credentials retrieved successfully'
     }
-  } catch (pythonError) {
-    console.error('Error retrieving bank credentials:', pythonError.response?.data || pythonError.message);
+  } catch (error) {
+    console.error('Error retrieving bank credentials:', error.response?.data || error.message);
     // Continue with the response even if Python server call fails
+    return {
+      success: false,
+      message: error.response?.data?.detail || "Failed to retrieve bank credentials"
+    };
   }
 }
 
@@ -51,11 +58,13 @@ app.post('/create-session', async (req, res) => {
     }
     
     const amount = decoded.amount;
-    if (!amount) {
-      return res.status(400).json({ error: 'Amount missing in token' });
+    const org_id = decoded.org_id;
+    console.log('Amount:', amount, 'Org ID:', org_id);
+    if (!amount || !org_id) {
+      return res.status(400).json({ error: 'Amount or Org ID missing in token' });
     }
-    
-    account_credentials = await get_bank_credentials(decoded.auth_token);
+
+    account_credentials = await get_bank_credentials(org_id, decoded.auth_token);
     console.log('Account credentials:', account_credentials.data);
     const merchant_account = account_credentials.data.merchant_account;
     const merchant_api_key = account_credentials.data.merchant_api_key;
@@ -78,8 +87,8 @@ app.post('/create-session', async (req, res) => {
           url: "https://deeplink-drab.vercel.app"
           // url: "http://localhost:3000/success" // for testing purposes
         },
-        // returnUrl: `https://deeplink-drab.vercel.app/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
-        returnUrl: `http://localhost:3000/success?orderId=${orderId}&auth_token=${decoded.auth_token}` // must be a real URL
+        returnUrl: `https://deeplink-drab.vercel.app/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}`
+        // returnUrl: `http://localhost:3000/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}` // must be a real URL
       },
       order: {
         currency: "PKR",
@@ -108,16 +117,20 @@ app.post('/create-session', async (req, res) => {
 });
 
 
-async function post_bank_data(data, auth_token) {
+async function post_bank_data(data, org_id, auth_token) {
 
   try {
+    console.log('Posting data to Python server:', auth_token);
     await axios.post(
-      'http://127.0.0.1:8000/payment_method/bank/save_transaction',
+      'http://192.168.11.23:8890/payment_method/bank/save_transaction',
       data,
       {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth_token}`
+        },
+        params: {
+          org_id: org_id
         }
       }
     );
@@ -125,10 +138,14 @@ async function post_bank_data(data, auth_token) {
       success: true,
       message: 'Information saved successfully'
     };
-  }
-  catch (pythonError) {
-    console.error('Error saving to Python server:', pythonError.response?.data || pythonError.message);
-    // Continue with the response even if Python server call fails
+  } 
+  catch (error) {
+    return {
+    success: false,
+    message:
+      error.response?.data?.detail ||
+      "Failed to save transaction data" 
+    };
   }
 }
 
@@ -136,14 +153,84 @@ async function post_bank_data(data, auth_token) {
 app.get('/success', async (req, res) => {
   try {
     const orderId = req.query.orderId;
+    const org_id = req.query.org_id;
     const auth_token = req.query.auth_token;
-    if (!auth_token) {
-      return res.status(400).send('Auth token is required');
+    console.log('Order ID:', orderId, 'Org ID:', org_id, 'Auth Token:', auth_token);
+    // Validate required fields
+    if (!auth_token || !org_id || !orderId) {
+      return res.status(400).send(`
+        <html>
+          <head>
+            <title>Missing Required Fields</title>
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <style>
+              body {
+                background: #f7f7f7;
+                color: #222;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                min-height: 100dvh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .container {
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+                padding: 2.5rem 2rem;
+                max-width: 400px;
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+                word-break: break-word;
+              }
+              .fail {
+                color: #d32f2f;
+                font-size: 2rem;
+                margin-bottom: 1rem;
+              }
+              .gap {
+                margin: 1.5rem 0;
+                background: #f7f7f7;
+                height: 2px;
+                border: none;
+              }
+              .redirect-msg {
+                color: #888;
+                margin-top: 1.5rem;
+              }
+              @media (max-width: 600px) {
+                .container {
+                  padding: 1.2rem 0.5rem;
+                  max-width: 90vw;
+                  margin: 2vh auto;
+                  border-radius: 10px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                }
+                .fail {
+                  font-size: 1.4rem;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="fail">Missing Required Fields</div>
+              <hr class="gap" />
+              <div>Please provide all required fields (orderId, org_id, auth_token).</div>
+              <div class="redirect-msg">You will be redirected to the homepage shortly.</div>
+            </div>
+            <script>
+              alert("Missing required fields: orderId, org_id, or auth_token");
+            </script>
+          </body>
+        </html>
+      `);
     }
-    const bank_credentials = await get_bank_credentials(auth_token);
-    if (!orderId) {
-      return res.status(400).send('Order ID is required');
-    }
+    const bank_credentials = await get_bank_credentials(org_id, auth_token);
 
     // Use .data for credentials
     const merchant_url = bank_credentials.data.merchant_url;
@@ -153,6 +240,7 @@ app.get('/success', async (req, res) => {
     const transactionResponse = await axios.get(
       `${merchant_url}/api/rest/version/100/merchant/${merchant_account}/order/${orderId}`,
       {
+     
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Basic ${Buffer.from(`merchant.${merchant_account}:${merchant_api_key}`).toString('base64')}`,
@@ -268,9 +356,101 @@ app.get('/success', async (req, res) => {
       amount: result.amount
     };
 
-    post_data = await post_bank_data(pythonApiPayload, auth_token);
+    post_data = await post_bank_data(pythonApiPayload, org_id, auth_token);
     console.log('Post data result:', post_data);
 
+    if (!post_data?.success) {
+      // Show error message as styled HTML if saving transaction failed
+      return res.send(`
+        <html>
+          <head>
+            <title>Transaction Saved Error</title>
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <style>
+              body {
+                background: #f7f7f7;
+                color: #222;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                min-height: 100dvh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+              .container {
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+                padding: 2.5rem 2rem;
+                max-width: 400px;
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+                word-break: break-word;
+              }
+              .fail {
+                color: #d32f2f;
+                font-size: 2rem;
+                margin-bottom: 1rem;
+              }
+              .gap {
+                margin: 1.5rem 0;
+                background: #f7f7f7;
+                height: 2px;
+                border: none;
+              }
+              .redirect-msg {
+                color: #888;
+                margin-top: 1.5rem;
+              }
+              .btn {
+                margin-top: 2rem;
+                background: #78de78;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                padding: 0.7rem 2rem;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background 0.2s;
+              }
+              .btn:hover {
+                background: #5fc95f;
+              }
+              @media (max-width: 600px) {
+                .container {
+                  padding: 1.2rem 0.5rem;
+                  max-width: 90vw;
+                  margin: 2vh auto;
+                  border-radius: 10px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                }
+                .fail, .success {
+                  font-size: 1.4rem;
+                }
+                .btn {
+                  width: 100%;
+                  font-size: 1rem;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="fail">Transaction Saved Error</div>
+              <hr class="gap" />
+              <div>${post_data.message || "Failed to save transaction."}</div>
+              <div class="redirect-msg">You will be redirected to the homepage shortly.</div>
+            </div>
+            <script>
+              alert("Transaction save error: ${post_data.message || "Unknown error"}");
+            </script>
+          </body>
+        </html>
+      `);
+    }
     // Show success message as styled HTML
     res.send(`
       <html>
