@@ -65,6 +65,9 @@ app.post('/create-session', async (req, res) => {
     }
 
     account_credentials = await get_bank_credentials(org_id, decoded.auth_token);
+    if (!account_credentials.success || !account_credentials.data) {
+      return res.status(500).json({ error: account_credentials.message || 'Failed to retrieve bank credentials' });
+    }
     console.log('Account credentials:', account_credentials.data);
     const merchant_account = account_credentials.data.merchant_account;
     const merchant_api_key = account_credentials.data.merchant_api_key;
@@ -87,8 +90,8 @@ app.post('/create-session', async (req, res) => {
           url: "https://deeplink-drab.vercel.app"
           // url: "http://localhost:3000/success" // for testing purposes
         },
-        returnUrl: `https://deeplink-drab.vercel.app/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}`
-        // returnUrl: `http://localhost:3000/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}` // must be a real URL
+        // returnUrl: `https://deeplink-drab.vercel.app/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}`
+        returnUrl: `http://localhost:3000/success?orderId=${orderId}&org_id=${org_id}&auth_token=${decoded.auth_token}` // must be a real URL
       },
       order: {
         currency: "PKR",
@@ -231,6 +234,36 @@ app.get('/success', async (req, res) => {
       `);
     }
     const bank_credentials = await get_bank_credentials(org_id, auth_token);
+
+    // Add this check:
+    if (!bank_credentials.success || !bank_credentials.data) {
+      return res.status(500).send(`
+        <html>
+          <head>
+            <title>Bank Credentials Error</title>
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <style>
+              body { background: #f7f7f7; color: #222; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+              .container { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.07); padding: 2.5rem 2rem; max-width: 400px; width: 100%; text-align: center; box-sizing: border-box; word-break: break-word; }
+              .fail { color: #d32f2f; font-size: 2rem; margin-bottom: 1rem; }
+              .gap { margin: 1.5rem 0; background: #f7f7f7; height: 2px; border: none; }
+              .redirect-msg { color: #888; margin-top: 1.5rem; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="fail">Bank Credentials Error</div>
+              <hr class="gap" />
+              <div>${bank_credentials.message || "Could not retrieve bank credentials."}</div>
+              <div class="redirect-msg">You will be redirected to the homepage shortly.</div>
+            </div>
+            <script>
+              alert("Bank credentials error: ${bank_credentials.message || "Unknown error"}");
+            </script>
+          </body>
+        </html>
+      `);
+    }
 
     // Use .data for credentials
     const merchant_url = bank_credentials.data.merchant_url;
