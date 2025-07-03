@@ -12,7 +12,8 @@ async function get_bank_credentials(org_id, auth_token) {
 
   try {
     const data = await axios.get(
-      'http://192.168.11.23:8890/payment_method/bank/details',
+      // 'http://192.168.11.23:8890/payment_method/bank/details',
+      'http://127.0.0.1:8000/payment_method/bank/details',
       {
         headers: {
           'Content-Type': 'application/json',
@@ -125,7 +126,8 @@ async function post_bank_data(data, org_id, auth_token) {
   try {
     console.log('Posting data to Python server:', auth_token);
     await axios.post(
-      'http://192.168.11.23:8890/payment_method/bank/save_transaction',
+      // 'http://192.168.11.23:8890/payment_method/bank/save_transaction',
+      'http://127.0.0.1:8000/payment_method/bank/save_transaction',
       data,
       {
         headers: {
